@@ -11,23 +11,42 @@ import {
 import Icon from "./Icon";
 import { GoogleLogin } from "react-google-login";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import { useDispatch } from "react-redux"
+import { useDispatch } from "react-redux"; // pour pouvoir dispatchh nos actions
 import { useHistory } from "react-router-dom";
 import Input from "./Input";
+import { signup, signin } from "../../actions/auth";
 
 import useStyles from "./styles";
+
+const initialState = {
+  firstname: "",
+  lastname: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+};
 
 const Auth = () => {
   const classes = useStyles();
 
   const [showPassword, setShowPassword] = useState(false);
   const [isSignup, setIsSignup] = useState(false);
+  const [formData, setFormData] = useState(initialState); // on a crée un state initial qui représente la valeur de départ avec les champs de notre formulaire et on passe dans le state du FormData
   const dispatch = useDispatch();
-  const history = useHistory()
+  const history = useHistory();
 
-  const handleSubmit = () => {};
+  const handleSubmit = (e) => {
+    e.preventDefault(); //pour retirer le comportement de rafrachissement du navigateur lorsque qu'on clique sur connecte à utiliser dans lesformulaires sur React
+    if (isSignup) {
+      dispatch(signup(formData, history));
+    } else {
+      dispatch(signin(formData, history)); // on passe le formData pour l'avoir dans notre database et le history pour pouvoir naviguer si quelque chose se passe
+    }
+  };
 
-  const handleChange = () => {};
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value }); // pour pouvoir utiliser le [] on doit vérifier si les clés donné dans le initial state est égale au "name" donnée dans le formulaire
+  }; // ça va permettre d'ajouter le reste des propriété et de seulement changer celui qu'on veut seulement changer dans notre il s'agit du "Input" dans lequel on est
 
   const handleShowPassword = () =>
     setShowPassword((prevShowPassword) => !prevShowPassword); // si on change un state à partir de la valeur précédente du state on utilise un callback pour pouvoir switcher
@@ -42,13 +61,13 @@ const Auth = () => {
     const token = res?.tokenId;
 
     try {
-      dispatch({ type: "AUTH", data: {result, token}})
-      history.push('/') // pour qu'on soit redirigé vers le HOME
+      dispatch({ type: "AUTH", data: { result, token } });
+      history.push("/"); // pour qu'on soit redirigé vers le HOME
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   };
-  
+
   const googleFailure = (error) => {
     console.log(error);
     console.log("Connexion avec Google échoué, Réessayer plus tard");
@@ -75,8 +94,8 @@ const Auth = () => {
                   half
                 />
                 <Input
-                  name="firstname"
-                  label="Prénom"
+                  name="lastname"
+                  label="Nom"
                   handleChange={handleChange}
                   half
                 />

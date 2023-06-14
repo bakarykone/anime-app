@@ -6,7 +6,7 @@ import {
   applyMiddleware,
   compose,
 } from "redux";
-import thunk from "redux-thunk";
+import thunk from "redux-thunk"; // comme on a des actions qui sont asyncrones ce qui veut dire qu'on a des fonctions qui retourne des fonctions asyncrones
 
 import reducers from "./reducers";
 
