@@ -1,13 +1,29 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom"
 import { AppBar, Avatar, Typography, Toolbar, Button } from "@material-ui/core";
+import { useDispatch } from "react-redux";
+import { useHistory } from "react-router-dom";
 import useStyles from "./styles"
 import bakanime from '../../images/bakanime.png'
 
 const Navbar = () => {
     const classes = useStyles()
-    const user = null
-    const logout = () => {}
+    const  [user, setUser] = useState(JSON.parse(localStorage.getItem('profile'))) // pour chercher le user actuel pour amener quelque chose du local storage donc le profil on utilise JSON.parse(localStorage.getItem('profile'))
+    const dispatch = useDispatch();
+    const history = useHistory()
+    
+    const logout = () => {
+      dispatch({type: 'LOGOUT'})
+      history.push('/') // comme ça quand quelqu'un se déconnecte on le renvoi à l'Accueil
+      setUser(null)// puisque qu'on se déconnecte on a plus de user
+    }
+
+    useEffect(() => {
+      const token = user?.token; // si le token existe alors on le transmet à notre variable token
+    
+      setUser(JSON.parse(localStorage.getItem('profile')))
+    }, []) 
+
   return (
     <AppBar className={classes.appBar} position="static" color="inherit">
     <div className={classes.brandContainer}>
