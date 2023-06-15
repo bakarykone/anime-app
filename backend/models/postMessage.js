@@ -7,9 +7,9 @@ const postSchema = mongoose.Schema ({
     creator: String,
     tags: [String],
     selectedFile: String,
-    likeCount: {
-        type: Number,
-        default: 0
+    likes: {
+        type: [String],
+        default:  [],
     },
     createdAt: {
         type: Date,
@@ -20,5 +20,7 @@ const postSchema = mongoose.Schema ({
 //On va transformer notre Schema en Modèle
 
 const PostMessage = mongoose.model('PostMessage', postSchema);
+
+//on ajoute le(s) like actuels de chaque post: ligne 10
 
 export default PostMessage;
