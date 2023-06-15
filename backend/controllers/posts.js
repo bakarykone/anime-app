@@ -53,13 +53,37 @@ export const deletePost = async (req, res) => {
 
 export const likePost = async (req, res) => {
   const { id } = req.params;
+  //condition qui vérifie si le user est authentifié pour qu'il puisse liker le post 1 seul fois
+  if (!req.userId) {
+    //fais référence à notre middleware
+    console.log("Non authentifié");
+    return res.json({ message: "Non authentifié" });
+  }
+
   if (!mongoose.Types.ObjectId.isValid(id))
     return res.status(404).send("Aucun post avec cette id");
 
   const post = await PostMessage.findById(id); // pour trouver le post qu'on recherche
+
+  //on va vérifier si le user id a déja liker
+  //on check si l'id est égale à l'id qu'on connais
+  const index = post.likes.findIndex((id) => id === String(req.userId));
+
+  //seulement si son id n'est pas connu dans le req.userId alors se sera égale à -1
+  if (index === -1) {
+    //aimer un post
+    post.likes.push(req.userId)
+  } else {
+    //dislike the post
+    //les likes deviennent des ids et on filtre avec celui de la personne actuelle
+    //ce qui va retourner le tableau de tout les likes avant que le user like
+    post.likes = post.likes.filter((id) => id !== String(req.userId))
+  }
+
+  // maintenant on a le meme vieux post qui inclue le like lui-même
   const updatedPost = await PostMessage.findByIdAndUpdate(
     id,
-    { likeCount: post.likeCount + 1 },
+    post,
     { new: true }
   ); // en plus de l'id en second paramètre on veut passer notre maj c'est donc un objet comme on peut le voir dans le modèle on va donc incrémenter notre likeCount avec post.likeCount(qui représente le post qu'on a recherché dans la ligne de dessus) + 1 et comme c'est une requête patch on doit rajouter un troisième paramètre new qui est à l'intérieur d'un objet où new est vrai
 
