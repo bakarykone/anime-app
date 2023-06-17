@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 const auth = async (req, res, next) => {
   try {
     // on va vérifier si le user est réellement la personne qu'il doit être et pour ça on va utiliser le jsonwebtoken après que le user s'est inscrit ou s'est connecté il aura un token spécifique et lorsqu'il voudra faire quelque chose comme liker un post ou supprimer un post on va vérifier si son token est valide
-    const token = req.headers.authorization.split("")[1]; //comme on veut seulement le token qui est placé à l'index 1 du tableau après qu'on les split
+    const token = req.headers.authorization.split(" ")[1]; //comme on veut seulement le token qui est placé à l'index 1 du tableau après qu'on les split
 
     // on va avoir 2 sortes de token un de google auth et un qui nous appartient
     // on va donc si c'est le notre ou celui de google auth
