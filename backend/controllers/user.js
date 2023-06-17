@@ -42,7 +42,7 @@ export const signin = async (req, res) => {
 };
 
 export const signup = async (req, res) => {
-  const { email, password, confirmPasssword, firstName, lastName } = req.body;
+  const { email, password, confirmPassword, firstname, lastname } = req.body;
   try {
     const existingUser = await User.findOne({ email }); // afin de trouver si on a un user avec cette adresse mail dans la database parce que si il est déja enregistré on ne peux pas en crée un nouveau avec cette adresse mail
     if (existingUser) {
@@ -52,20 +52,21 @@ export const signup = async (req, res) => {
         .json({ message: "L'utilisateur avec ce mail existe déja" });
     }
 
-    if (password !== confirmPasssword) {
+    if (password !== confirmPassword) {
       console.log("les mots de passes sont différents");
+      console.log(confirmPassword);
       return res
         .status(400)
         .json({ message: "Les mots de passe ne sont pas identiques" });
     }
-
+    
     //avat de créer un user on va haché le mdp puisqu'on veut pas stoker dans un texte clair
     const hashedPassword = await bcrypt.hash(password, 12); // le premier argument est le mdp qu'on va haché et le second argumet est le "salt" qui représente le niveau qu'on utilise pour haché le string il s'agit d'un number ou d'un string
     //maintenant on crée notre user
     const result = await User.create({
       email,
       password: hashedPassword,
-      name: `${firstName} ${lastName}`,
+      name: `${firstname} ${lastname}`,
     });
 
     const token = jwt.sign(
