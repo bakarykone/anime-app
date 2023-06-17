@@ -15,6 +15,7 @@ import { useDispatch } from "react-redux"; // pour pouvoir dispatchh nos actions
 import { useHistory } from "react-router-dom";
 import Input from "./Input";
 import { signup, signin } from "../../actions/auth";
+import { AUTH } from "../../constants/actionTypes";
 
 import useStyles from "./styles";
 
@@ -26,34 +27,29 @@ const initialState = {
   confirmPassword: "",
 };
 
-const Auth = () => {
+const SignUp = () => {
   const classes = useStyles();
-
-  const [showPassword, setShowPassword] = useState(false);
+  const [form, setForm] = useState(initialState); // on a crée un state initial qui représente la valeur de départ avec les champs de notre formulaire et on passe dans le state du Form
   const [isSignup, setIsSignup] = useState(false);
-  const [formData, setFormData] = useState(initialState); // on a crée un state initial qui représente la valeur de départ avec les champs de notre formulaire et on passe dans le state du FormData
   const dispatch = useDispatch();
   const history = useHistory();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const handleShowPassword = () => setShowPassword(!showPassword); // si on change un state à partir de la valeur précédente du state on utilise un callback pour pouvoir switcher
+
+  const switchMode = () => {
+    setForm(initialState);
+    setIsSignup((prevIsSignup) => !prevIsSignup);
+    setShowPassword(false); // permet de reset le faite de montrer le mdp
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault(); //pour retirer le comportement de rafrachissement du navigateur lorsque qu'on clique sur connecte à utiliser dans lesformulaires sur React
     if (isSignup) {
-      dispatch(signup(formData, history));
+      dispatch(signup(form, history));
     } else {
-      dispatch(signin(formData, history)); // on passe le formData pour l'avoir dans notre database et le history pour pouvoir naviguer si quelque chose se passe
+      dispatch(signin(form, history)); // on passe le form pour l'avoir dans notre database et le history pour pouvoir naviguer si quelque chose se passe
     }
-  };
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value }); // pour pouvoir utiliser le [] on doit vérifier si les clés donné dans le initial state est égale au "name" donnée dans le formulaire
-  }; // ça va permettre d'ajouter le reste des propriété et de seulement changer celui qu'on veut seulement changer dans notre il s'agit du "Input" dans lequel on est
-
-  const handleShowPassword = () =>
-    setShowPassword((prevShowPassword) => !prevShowPassword); // si on change un state à partir de la valeur précédente du state on utilise un callback pour pouvoir switcher
-
-  const switchMode = () => {
-    setIsSignup((prevIsSignup) => !prevIsSignup);
-    handleShowPassword(false); // permet de reset le faite de montrer le mdp
   };
 
   const googleSuccess = async (res) => {
@@ -61,17 +57,20 @@ const Auth = () => {
     const token = res?.tokenId;
 
     try {
-      dispatch({ type: "AUTH", data: { result, token } });
+      dispatch({ type: AUTH, data: { result, token } });
       history.push("/"); // pour qu'on soit redirigé vers le HOME
     } catch (error) {
       console.log(error);
     }
   };
 
-  const googleFailure = (error) => {
-    console.log(error);
-    console.log("Connexion avec Google échoué, Réessayer plus tard");
+  const googleError = (error) => {
+    console.log("Connexion avec Google échoué, Réessayer plus tard :" + error.message);
   };
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value }); // pour pouvoir utiliser le [] on doit vérifier si les clés donné dans le initial state est égale au "name" donnée dans le formulaire
+  }; // ça va permettre d'ajouter le reste des propriété et de seulement changer celui qu'on veut seulement changer dans notre il s'agit du "Input" dans lequel on est
 
   return (
     <Container component="main" maxWidth="xs">
@@ -79,7 +78,7 @@ const Auth = () => {
         <Avatar className={classes.avatar}>
           <LockOutlinedIcon />
         </Avatar>
-        <Typography variant="h5">
+        <Typography component="h1" variant="h5">
           {isSignup ? "S'inscrire" : "Se connecter"}
         </Typography>
         <form className={classes.form} onSubmit={handleSubmit}>
@@ -132,31 +131,33 @@ const Auth = () => {
           >
             {isSignup ? "S'inscrire" : "Se Connecter"}
           </Button>
+          <GoogleLogin
+            clientId="353352025599-q4r5coonu4j3tp4n24apl35ra7ddaouj.apps.googleusercontent.com" // GOOGLE ID
+            render={(renderProps) => (
+              <Button
+                className={classes.googleButton}
+                color="primary"
+                fullWidth
+                onClick={renderProps.onClick}
+                disabled={renderProps.disabled}
+                startIcon={<Icon />}
+                variant="contained"
+              >
+                Connexion avec Google
+              </Button>
+            )}
+            onSuccess={googleSuccess}
+            onFailure={googleError}
+            cookiePolicy="single_host_origin"
+          />
           <Grid container justifyContent="flex-end">
-            <GoogleLogin
-              clientId="353352025599-q4r5coonu4j3tp4n24apl35ra7ddaouj.apps.googleusercontent.com" // GOOGLE ID
-              render={(renderProps) => (
-                <Button
-                  className={classes.googleButton}
-                  color="primary"
-                  fullWidth
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                  startIcon={<Icon />}
-                  variant="contained"
-                >
-                  Connexion avec Google
-                </Button>
-              )}
-              onSuccess={googleSuccess}
-              onFailure={googleFailure}
-              cookiePolicy="single_host_origin"
-            />
-            <Button onClick={switchMode}>
-              {isSignup
-                ? "Vous avez déja un compte? Connectez-vous"
-                : "Pas encore de compte? Créer en un"}
-            </Button>
+            <Grid item>
+              <Button onClick={switchMode}>
+                {isSignup
+                  ? "Vous avez déja un compte? Connectez-vous"
+                  : "Pas encore de compte? Créer en un"}
+              </Button>
+            </Grid>
           </Grid>
         </form>
       </Paper>
@@ -164,4 +165,4 @@ const Auth = () => {
   );
 };
 
-export default Auth;
+export default SignUp;
